@@ -21,68 +21,8 @@ I then re-analysed it and the same result occurred. As VirusTotal has a communit
 
 <img width="600" alt="image" src="https://i.imgur.com/npnNytZ.png">
 
-### Configured OpenVAS to Perform First Unauthenticated Scan against Vulnerable VM
- <img width="730" alt="image" src="https://i.imgur.com/MHjlsqp.png">
-1. Logged into OpenVAS and navigated to New Host.
-2. Added the Client VM Private IP Address.
-3. Created a new target from the host, and named it "Azure Vulnerable VMs".
-4. Took note of the credentials as i was adding SMB credentials later.
-5. Created a new Task:
-    "Scan - Azure Vulnerable VMs"
-   - Scan Targets: "Azure Vulnerable VMs"
-6. Saved the Task.
-7. Started the "Scan - Azure Vulnerable VMs" Task.
-8. Once the scan was finished, I clicked the date under "Last Report" to see the results.
-9. Took note of the Tabs, especially the "Results" tab.
+### Conclusion
+The investigation confirmed that the email in question was a malicious phishing attempt designed to harvest user credentials under the guise of a legitimate PayPal security alert. Technical analysis revealed multiple red flags, including failed SPF and DKIM authentication, lack of DMARC compliance, mismatched sender domains, and the presence of a credential-stealing HTML attachment. OSINT checks further verified that the embedded domain was newly registered and flagged by multiple security engines as malicious.
 
-### Made Configurations for Credentialed Scans (Within VM)
-<img width="508" alt="image" src="https://i.imgur.com/6sKjVhH.png">
+These findings highlight the importance of layered email security controls, such as SPF/DKIM/DMARC enforcement, phishing awareness training, and sandbox analysis for suspicious attachments. By identifying and documenting these indicators of compromise, this analysis provides actionable intelligence that can be used to enhance detection rules, block malicious infrastructure, and prevent future phishing attacks.
 
-1. Disable the Windows Firewall.
-2. Disable User Account Control.
-3. Enabled the Remote Registry.
-4. Set Registry Key:
-   - Launch Registry Editor (regedit.exe) in "Run as administrator" mode.
-   - Navigate to HKEY_LOCAL_MACHINE hive.
-   - Open SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System key.
-   - Create a new DWORD (32-bit) value with the following properties:
-     - Name: LocalAccountTokenFilterPolicy
-     - Value: 1
-   - Close Registry Editor.
-5. Restart the VM.
-
-### Made Configurations for Credentialed Scans (OpenVAS)
-
-1. Went to New Credential.
-2. Name / Comment: "Azure VM Credentials".
-3. Allowed Insecure Use: Yes.
-4. logged in and saved
-5. Go to Configuration > Targets > CLONE the Target we made before.
-6. NEW Name / Comment: "Azure Vulnerable VMs - Credentialed Scan".
-7. Ensure the Private IP is still accurate.
-8. Credentials > SMB > Select the Credentials we just made: Azure VM Credentials.
-9. Save.
-
-### Executed Credentialed Scan against Vulnerable Windows VM
-
-<img width="861" alt="image" src="https://i.imgur.com/JeWrDnW.png">
-
-1. Within Greenbone / OpenVAS, go to Scans > Tasks.
-2. cloned the "Scan - Azure Vulnerable VMs" Task and Edited it.
-3. Name / Comment: "Scan - Azure Vulnerable VMs - Credentialed".
-4. Targets: Azure Vulnerable VMs - Credentialed Scan.
-5. Save.
-6. Clicked the Play button to launch the new Credentialed Scan and wait for it to finish.
-
-### Remediated Vulnerabilities
-<img width="799" alt="image" src="https://i.imgur.com/mThmLAX.png">
-
-1. Logged back into vulnerable VM.
-2. Uninstall Adobe Reader, VLC Player, and Firefox.
-3. Restart the VM.
-4. Re-initiate the "Scan - Azure Vulnerable VMs - Credentialed" scan and observe the results.
-
-### Verify Remediations
-<img width="1120" alt="image" src="https://i.imgur.com/SI9VYHn.png">
-
- After this, there were no longer Vuln
